@@ -1,0 +1,88 @@
+Control Plan Configuration (Master Nodes):-
+
+cloud_user@k8s-control:~$ cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+EOF
+[sudo] password for cloud_user:
+overlay
+br_netfilter
+cloud_user@k8s-control:~$ sudo modprobe overlay
+cloud_user@k8s-control:~$ sudo modprobe br_netfilter
+cloud_user@k8s-control:~$ cat <<EOF | sudo tee /etc/sysctl.d/99-
+99-cloudimg-ipv6.conf  99-sysctl.conf
+cloud_user@k8s-control:~$ cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+EOF
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+cloud_user@k8s-control:~$sudo sysctl --system
+#Install containerd
+cloud_user@k8s-control:~$ sudo apt-get update && sudo apt-get install -y containerd
+cloud_user@k8s-control:~$ sudo mkdir -p /etc/containerd
+cloud_user@k8s-control:~$ sudo containerd config default | sudo tee /etc/containerd/config.toml
+cloud_user@k8s-control:~$ sudo systemctl restart containerd
+cloud_user@k8s-control:~$ sudo systemctl status containerd
+● containerd.service - containerd container runtime
+     Loaded: loaded (/lib/systemd/system/containerd.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2023-09-28 10:46:25 UTC; 1min 15s ago
+       Docs: https://containerd.io
+    Process: 3750 ExecStartPre=/sbin/modprobe overlay (code=exited, status=0/SUCCESS)
+   Main PID: 3751 (containerd)
+      Tasks: 9
+     Memory: 13.4M
+     CGroup: /system.slice/containerd.service
+             └─3751 /usr/bin/containerd
+
+cloud_user@k8s-control:~$ sudo swapoff -a
+cloud_user@k8s-control:~$ sudo apt-get update && sudo apt-get install -y apt-transport-https curl
+cloud_user@k8s-control:~$ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+OK
+cloud_user@k8s-control:~$ cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+> deb https://apt.kubernetes.io/ kubernetes-xenial main
+> EOF
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+cloud_user@k8s-control:~$ sudo apt-get update
+cloud_user@k8s-control:~$ sudo apt-get install -y kubelet=1.27.0-00 kubeadm=1.27.0-00 kubectl=1.27.0-00
+cloud_user@k8s-control:~$ sudo apt-mark hold kubelet kubeadm kubectl
+kubelet set on hold.
+kubeadm set on hold.
+kubectl set on hold.
+
+Repeat the same commands in worker node1 and node2
+
+Initialize the Cluster - On Control Plane Node (Master)
+
+cloud_user@k8s-control:~$ sudo kubeadm init --pod-network-cidr 192.168.0.0/16 --kubernetes-version 1.27.0
+[init] Using Kubernetes version: v1.27.0
+[preflight] Running pre-flight checks
+[preflight] Pulling images required for setting up a Kubernetes cluster
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 10.0.1.101:6443 --token nrl1ih.nucijyd3hvawm6c4 \
+        --discovery-token-ca-cert-hash sha256:3dddc0ea6257400621610bc29562a4ff5dc91c03097bc7ef912fa34c38fb4ec1
+cloud_user@k8s-control:~$
+cloud_user@k8s-control:~$ kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+error: error loading config file "/etc/kubernetes/admin.conf": open /etc/kubernetes/admin.conf: permission d
+enied
+cloud_user@k8s-control:~$ sudo chmod 755 /etc/kubernetes/admin.conf
+cloud_user@k8s-control:~$ kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+cloud_user@k8s-control:~$ kubectl get nodes
+NAME          STATUS   ROLES           AGE     VERSION
+k8s-control   Ready    control-plane   7m57s   v1.27.0
+cloud_user@k8s-control:~$
