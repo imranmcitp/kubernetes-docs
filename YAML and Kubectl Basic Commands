@@ -1,0 +1,159 @@
+k8s - kubectl commands
+
+Get:-
+
+kubectl get namespaces
+kubectl get pods
+kubectl get pods -namespace kube-system
+kubectl get pods --all-namespaces
+
+Create:-
+kubectl create namespace my-namespace
+
+
+cloud_user@k8s-control:~$ kubectl create namespace dev
+namespace/dev created
+cloud_user@k8s-control:~$ kubectl get namespaces
+NAME              STATUS   AGE
+default           Active   15m
+dev               Active   9s
+kube-node-lease   Active   15m
+kube-public       Active   15m
+kube-system       Active   15m
+mobile-gateway    Active   14m
+oasis             Active   14m
+cloud_user@k8s-control:~$ kubectl get namespaces > /home/cloud_user/name
+spaces.txt
+cloud_user@k8s-control:~$ cat namespaces.txt
+NAME              STATUS   AGE
+default           Active   15m
+dev               Active   39s
+kube-node-lease   Active   15m
+kube-public       Active   15m
+kube-system       Active   15m
+mobile-gateway    Active   14m
+oasis             Active   14m
+cloud_user@k8s-control:~$ kubectl get pods
+No resources found in default namespace.
+cloud_user@k8s-control:~$ kubectl get pods -n mobile-gateway
+NAME            READY   STATUS    RESTARTS   AGE
+gateway-auth    1/1     Running   0          15m
+gateway-data    1/1     Running   0          15m
+gateway-users   1/1     Running   0          15m
+cloud_user@k8s-control:~$
+
+cloud_user@k8s-control:~$ kubectl get pods --all-namespaces
+NAMESPACE        NAME                                       READY   STAT
+US    RESTARTS   AGE
+kube-system      calico-kube-controllers-6c99c8747f-jnrn9   1/1     Runn
+ing   0          15m
+kube-system      calico-node-vbpgz                          1/1     Runn
+ing   0          15m
+kube-system      calico-node-vqlqp                          1/1     Runn
+ing   0          15m
+kube-system      coredns-5d78c9869d-8ntfv                   1/1     Runn
+ing   0          16m
+kube-system      coredns-5d78c9869d-mfprk                   1/1     Runn
+ing   0          16m
+kube-system      etcd-k8s-control                           1/1     Runn
+ing   0          16m
+kube-system      kube-apiserver-k8s-control                 1/1     Runn
+ing   0          16m
+kube-system      kube-controller-manager-k8s-control        1/1     Runn
+ing   0          16m
+kube-system      kube-proxy-9fq9j                           1/1     Runn
+ing   0          15m
+kube-system      kube-proxy-mlbhp                           1/1     Runn
+ing   0          16m
+kube-system      kube-scheduler-k8s-control                 1/1     Runn
+ing   0          16m
+mobile-gateway   gateway-auth                               1/1     Runn
+ing   0          15m
+mobile-gateway   gateway-data                               1/1     Runn
+ing   0          15m
+mobile-gateway   gateway-users                              1/1     Runn
+ing   0          15m
+oasis            quark                                      1/1     Runn
+ing   0          15m
+cloud_user@k8s-control:~$
+
+Draining the Pods
+
+kubectl drain <node name>
+
+kubectl drain <node name> --ignore-daemonsets
+
+kubectl uncordon <node name>
+
+sample deployment with yaml
+
+vi pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+	name: my-pod
+spec:
+	containers:
+	- name: nginx
+	  image: nginx:1.14.2
+	  ports:
+	  - containerPort: 80
+restartPolicy: OnFailure
+:wq
+
+kubectl apply -f pod.yml
+
+vi deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+	name: my-deployment
+	labels:
+		app: my-deployment
+spec:
+	replicas: 2
+	selector:
+		matchLables:
+			app: my-deployment
+	template:
+		metadata:
+			labels:
+				app: my-deployment
+	spec:
+		containers:
+		- name: nginx
+		  image: nginx:1.14.2
+		  ports:
+		  - containerPort: 80
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
