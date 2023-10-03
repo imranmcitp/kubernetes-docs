@@ -1,0 +1,21 @@
+K8s management Tools
+
+kubectl
+kubeadm
+minikube
+Helm
+Kompose
+Kustomize
+
+kubectl: is the official command line interface for kubernetes. It is the main method you will use to work with kubernetes in this course.
+
+kubeadm: we have already used kubeadm, which is a tool for quickly and easily creating k8s clusters.
+
+minikube: allows you to automatically set up a local single-node k8s cluster. It is great for getting k8s up and running quickly for development purposes.
+
+Helm: provides templating and package management for k8s objects. you can use it to manage you own templets. you can also downloads and share templates.
+
+Kompose: helps you translate docker compose files into k8s objects. If you are using docker compose for some part of your workflow, you can move your application to k8s easily with Kompose.
+
+Kustomize: is a configuration management tool for managing k8s objects configurations. It allows you to share and re-use templated configurations for k8s applications.
+
