@@ -1,0 +1,263 @@
+Docker Commands
+
+https://hub.docker.com/_/nginx
+
+docker pull nginx
+docker pull nginx:1.20
+
+docker images
+
+docker run nginx
+docker ps
+docker ps -a
+docker run -d nginx - running container in backgroup
+docker run -d nginx:1.20
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -d nginx
+a2880e909204d16c86540967dd33a8413fe4556c32d40e40ffe7c498d4ff4ba4
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS     NAMES
+a2880e909204   nginx     "/docker-entrypoint.…"   4 seconds ago   Up 3 seconds   80/tcp    hungry_blackburn
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps -a
+CONTAINER ID   IMAGE     COMMAND                  CREATED              STATUS                      PORTS     NAMES
+a2880e909204   nginx     "/docker-entrypoint.…"   19 seconds ago       Up 18 seconds               80/tcp    hungry_blackburn
+06f493bef887   nginx     "/docker-entrypoint.…"   About a minute ago   Exited (0) 43 seconds ago             interesting_chebyshev
+root@cloudopsAWSbuild:/home/dgxadmin# 
+root@cloudopsAWSbuild:/home/dgxadmin#
+
+port forwarding
+
+docker run -p 80:80 -d nginx
+docker run -p 90:80 -d nginx:1.20
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -p 80:80 -d nginx
+92444dc6bb83b6b6c3c466d74dbc189a40ac9bd58cae6b2efa998b55eb97dd74
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -p 90:80 -d nginx:1.20
+397e3bb4a9f6f83f0fe5e7c11f441522b7ebc6799f60d2b5ad10ba1e3bb87545
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED          STATUS          PORTS                               NAMES
+397e3bb4a9f6   nginx:1.20   "/docker-entrypoint.…"   22 seconds ago   Up 20 seconds   0.0.0.0:90->80/tcp, :::90->80/tcp   intelligent_wing
+92444dc6bb83   nginx        "/docker-entrypoint.…"   2 minutes ago    Up 2 minutes    0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+a2880e909204   nginx        "/docker-entrypoint.…"   6 minutes ago    Up 6 minutes    80/tcp                              hungry_blackburn
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+remove container
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker rm a2880e909204
+Error response from daemon: You cannot remove a running container a2880e909204d16c86540967dd33a8413fe4556c32d40e40ffe7c498d4ff4ba4. Stop the container before attempting removal or force remove
+root@cloudopsAWSbuild:/home/dgxadmin# docker stop a2880e909204
+a2880e909204
+root@cloudopsAWSbuild:/home/dgxadmin# docker rm a2880e909204
+a2880e909204
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED         STATUS         PORTS                               NAMES
+397e3bb4a9f6   nginx:1.20   "/docker-entrypoint.…"   2 minutes ago   Up 2 minutes   0.0.0.0:90->80/tcp, :::90->80/tcp   intelligent_wing
+92444dc6bb83   nginx        "/docker-entrypoint.…"   4 minutes ago   Up 4 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+custome name
+
+docker run --name imran -d nginx
+
+rename a container
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED         STATUS         PORTS                               NAMES
+bc6592030b31   nginx        "/docker-entrypoint.…"   4 seconds ago   Up 2 seconds   80/tcp                              imran
+397e3bb4a9f6   nginx:1.20   "/docker-entrypoint.…"   3 minutes ago   Up 3 minutes   0.0.0.0:90->80/tcp, :::90->80/tcp   intelligent_wing
+92444dc6bb83   nginx        "/docker-entrypoint.…"   5 minutes ago   Up 5 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+root@cloudopsAWSbuild:/home/dgxadmin# docker rename intelligent_wing nginx_imran
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED              STATUS              PORTS                               NAMES
+bc6592030b31   nginx        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                              imran
+397e3bb4a9f6   nginx:1.20   "/docker-entrypoint.…"   4 minutes ago        Up 4 minutes        0.0.0.0:90->80/tcp, :::90->80/tcp   nginx_imran
+92444dc6bb83   nginx        "/docker-entrypoint.…"   6 minutes ago        Up 6 minutes        0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+restart/start/stop
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED              STATUS              PORTS                               NAMES
+bc6592030b31   nginx        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                              imran
+397e3bb4a9f6   nginx:1.20   "/docker-entrypoint.…"   4 minutes ago        Up 4 minutes        0.0.0.0:90->80/tcp, :::90->80/tcp   nginx_imran
+92444dc6bb83   nginx        "/docker-entrypoint.…"   6 minutes ago        Up 6 minutes        0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+root@cloudopsAWSbuild:/home/dgxadmin# docker stop nginx_imran
+nginx_imran
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS          PORTS                               NAMES
+bc6592030b31   nginx     "/docker-entrypoint.…"   4 minutes ago    Up 4 minutes    80/tcp                              imran
+92444dc6bb83   nginx     "/docker-entrypoint.…"   10 minutes ago   Up 10 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+root@cloudopsAWSbuild:/home/dgxadmin# docker start nginx_imran
+nginx_imran
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED          STATUS          PORTS                               NAMES
+bc6592030b31   nginx        "/docker-entrypoint.…"   4 minutes ago    Up 4 minutes    80/tcp                              imran
+397e3bb4a9f6   nginx:1.20   "/docker-entrypoint.…"   8 minutes ago    Up 4 seconds    0.0.0.0:90->80/tcp, :::90->80/tcp   nginx_imran
+92444dc6bb83   nginx        "/docker-entrypoint.…"   10 minutes ago   Up 10 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+root@cloudopsAWSbuild:/home/dgxadmin# docker restart nginx_imran
+nginx_imran
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED          STATUS          PORTS                               NAMES
+bc6592030b31   nginx        "/docker-entrypoint.…"   5 minutes ago    Up 5 minutes    80/tcp                              imran
+397e3bb4a9f6   nginx:1.20   "/docker-entrypoint.…"   8 minutes ago    Up 3 seconds    0.0.0.0:90->80/tcp, :::90->80/tcp   nginx_imran
+92444dc6bb83   nginx        "/docker-entrypoint.…"   10 minutes ago   Up 10 minutes   0.0.0.0:80->80/tcp, :::80->80/tcp   nervous_mirzakhani
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+remove images
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
+nginx        latest    61395b4c586d   4 days ago      187MB
+nginx        1.20      0584b370e957   16 months ago   141MB
+root@cloudopsAWSbuild:/home/dgxadmin# docker rmi nginx
+Error response from daemon: conflict: unable to remove repository reference "nginx" (must force) - container 06f493bef887 is using its referenced image 61395b4c586d
+root@cloudopsAWSbuild:/home/dgxadmin# docker rmi -f nginx
+Untagged: nginx:latest
+Untagged: nginx@sha256:32da30332506740a2f7c34d5dc70467b7f14ec67d912703568daff790ab3f755
+Deleted: sha256:61395b4c586da2b9b3b7ca903ea6a448e6783dfdd7f768ff2c1a0f3360aaba99
+root@cloudopsAWSbuild:/home/dgxadmin# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
+nginx        1.20      0584b370e957   16 months ago   141MB
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+Docker Networking and Mongo DB and Express
+
+docker pull mongo:4.4.6
+
+setting environmet variables username and password
+
+docker run -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=password -p 27017:27017 -d mongo:4.4.6
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=password -p 27017:27017 -d mongo:4.4.6
+43f8f59d9008238da55d8d878adc486a543ba864f2eecab18e2c5f3f22377157
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE         COMMAND                  CREATED         STATUS         PORTS                                           NAMES
+43f8f59d9008   mongo:4.4.6   "docker-entrypoint.s…"   7 seconds ago   Up 5 seconds   0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   elated_hodgkin
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+mongo express - web
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -e ME_CONFIG_MONGODB_ADMINUSERNAME=root -e ME_CONFIG_MONGODB_ADMINPASSWORD=password -e ME_CONFIG_MONGODB_SERVER=localhost -p 8081:8081 -d --name mongo-web mongo-express
+Unable to find image 'mongo-express:latest' locally
+latest: Pulling from library/mongo-express
+6a428f9f83b0: Pull complete 
+f2b1fb32259e: Pull complete 
+40888f2a0a1f: Pull complete 
+4e3cc9ce09be: Pull complete 
+eaa1898f3899: Pull complete 
+ab4078090382: Pull complete 
+ae780a42c79e: Pull complete 
+e60224d64a04: Pull complete 
+Digest: sha256:dcfcf89bf91238ff129469a5a94523b3025913dcc41597d72d4d5f4a0339cc7d
+Status: Downloaded newer image for mongo-express:latest
+eb20123ab018bb665d145a7dd4acc94558b5900e393e3f7995ed07c362cd1c20
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS          PORTS                                           NAMES
+43f8f59d9008   mongo:4.4.6   "docker-entrypoint.s…"   12 minutes ago   Up 12 minutes   0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   elated_hodgkin
+root@cloudopsAWSbuild:/home/dgxadmin# docker log eb20123ab018bb665d145a7dd4acc94558b5900e393e3f7995ed07c362cd1c20
+docker: 'log' is not a docker command.
+See 'docker --help'
+root@cloudopsAWSbuild:/home/dgxadmin# docker logs eb20123ab018bb665d145a7dd4acc94558b5900e393e3f7995ed07c362cd1c20
+Welcome to mongo-express
+------------------------
+
+
+(node:7) [MONGODB DRIVER] Warning: Current Server Discovery and Monitoring engine is deprecated, and will be removed in a future version. To use the new Server Discover and Monitoring engine, pass option { useUnifiedTopology: true } to the MongoClient constructor.
+Could not connect to database using connectionString: mongodb://root:password@localhost:27017/"
+(node:7) UnhandledPromiseRejectionWarning: MongoNetworkError: failed to connect to server [localhost:27017] on first connect [Error: connect ECONNREFUSED 127.0.0.1:27017
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1144:16) {
+  name: 'MongoNetworkError'
+}]
+    at Pool.<anonymous> (/node_modules/mongodb/lib/core/topologies/server.js:441:11)
+    at Pool.emit (events.js:314:20)
+    at /node_modules/mongodb/lib/core/connection/pool.js:564:14
+    at /node_modules/mongodb/lib/core/connection/pool.js:1000:11
+    at /node_modules/mongodb/lib/core/connection/connect.js:32:7
+    at callback (/node_modules/mongodb/lib/core/connection/connect.js:300:5)
+    at Socket.<anonymous> (/node_modules/mongodb/lib/core/connection/connect.js:330:7)
+    at Object.onceWrapper (events.js:421:26)
+    at Socket.emit (events.js:314:20)
+    at emitErrorNT (internal/streams/destroy.js:92:8)
+    at emitErrorAndCloseNT (internal/streams/destroy.js:60:3)
+    at processTicksAndRejections (internal/process/task_queues.js:84:21)
+(node:7) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 1)
+(node:7) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS          PORTS                                           NAMES
+43f8f59d9008   mongo:4.4.6   "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes   0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   elated_hodgkin
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS          PORTS                                           NAMES
+43f8f59d9008   mongo:4.4.6   "docker-entrypoint.s…"   15 minutes ago   Up 15 minutes   0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   elated_hodgkin
+root@cloudopsAWSbuild:/home/dgxadmin# docker inspect 43f8f59d9008
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker inspect 43f8f59d9008 | grep IPAddress
+            "SecondaryIPAddresses": null,
+            "IPAddress": "172.17.0.2",
+                    "IPAddress": "172.17.0.2",
+root@cloudopsAWSbuild:/home/dgxadmin# 
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -e ME_CONFIG_MONGODB_ADMINUSERNAME=root -e ME_CONFIG_MONGODB_ADMINPASSWORD=password -e ME_CONFIG_MONGODB_SERVER=172.17.0.2 -p 8081:8081 -d --name mongo-web1 mongo-express
+41aa6e54f957b3f80c20a1e0e526c67a609adf343744fedd54ca9ec910e3fc72
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps
+CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS          PORTS                                           NAMES
+41aa6e54f957   mongo-express   "tini -- /docker-ent…"   5 seconds ago    Up 4 seconds    0.0.0.0:8081->8081/tcp, :::8081->8081/tcp       mongo-web1
+43f8f59d9008   mongo:4.4.6     "docker-entrypoint.s…"   32 minutes ago   Up 32 minutes   0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   elated_hodgkin
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+networking
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+58c62e49b8a4   bridge    bridge    local
+a13284c63188   host      host      local
+de23533535a4   none      null      local
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -d --network none alpine
+Unable to find image 'alpine:latest' locally
+latest: Pulling from library/alpine
+7264a8db6415: Pull complete 
+Digest: sha256:7144f7bab3d4c2648d7e59409f15ec52a18006a128c733fcff20d3a4a54ba44a
+Status: Downloaded newer image for alpine:latest
+8fcf2097b4ab7cc64b057cbf4aaaeff66c28181db81dc532d571160491ef994e
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps -a
+CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS                      PORTS                                           NAMES
+8fcf2097b4ab   alpine          "/bin/sh"                33 seconds ago   Exited (0) 30 seconds ago                                                   inspiring_gauss
+41aa6e54f957   mongo-express   "tini -- /docker-ent…"   3 minutes ago    Up 3 minutes                0.0.0.0:8081->8081/tcp, :::8081->8081/tcp       mongo-web1
+eb20123ab018   mongo-express   "tini -- /docker-ent…"   24 minutes ago   Exited (0) 24 minutes ago                                                   mongo-web
+43f8f59d9008   mongo:4.4.6     "docker-entrypoint.s…"   36 minutes ago   Up 36 minutes               0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   elated_hodgkin
+92444dc6bb83   61395b4c586d    "/docker-entrypoint.…"   3 hours ago      Exited (0) 2 hours ago                                                      nervous_mirzakhani
+06f493bef887   61395b4c586d    "/docker-entrypoint.…"   3 hours ago      Exited (0) 3 hours ago                                                      interesting_chebyshev
+root@cloudopsAWSbuild:/home/dgxadmin# 
+
+root@cloudopsAWSbuild:/home/dgxadmin# docker run -d --network none alpine sleep 500
+f56d1cefa6b064b573b747081652aa2bee4c69d4e83b11c28582e4f3f5933754
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps -a
+CONTAINER ID   IMAGE           COMMAND                  CREATED              STATUS                          PORTS                                           NAMES
+f56d1cefa6b0   alpine          "sleep 500"              5 seconds ago        Up 3 seconds                                                                    priceless_beaver
+8fcf2097b4ab   alpine          "/bin/sh"                About a minute ago   Exited (0) About a minute ago                                                   inspiring_gauss
+41aa6e54f957   mongo-express   "tini -- /docker-ent…"   4 minutes ago        Up 4 minutes                    0.0.0.0:8081->8081/tcp, :::8081->8081/tcp       mongo-web1
+root@cloudopsAWSbuild:/home/dgxadmin# docker ps -a
+CONTAINER ID   IMAGE           COMMAND                  CREATED              STATUS                      PORTS                                           NAMES
+5c672620c33c   alpine          "sleep 5000"             About a minute ago   Up About a minute                                                           romantic_gould
+f56d1cefa6b0   alpine          "sleep 500"              2 minutes ago        Up 2 minutes                                                                priceless_beaver
+8fcf2097b4ab   alpine          "/bin/sh"                4 minutes ago        Exited (0) 3 minutes ago                                                    inspiring_gauss
+41aa6e54f957   mongo-express   "tini -- /docker-ent…"   6 minutes ago        Up 6 minutes                0.0.0.0:8081->8081/tcp, :::8081->8081/tcp       mongo-web1
+eb20123ab018   mongo-express   "tini -- /docker-ent…"   28 minutes ago       Exited (0) 28 minutes ago                                                   mongo-web
+43f8f59d9008   mongo:4.4.6     "docker-entrypoint.s…"   39 minutes ago       Up 39 minutes               0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   elated_hodgkin
+92444dc6bb83   61395b4c586d    "/docker-entrypoint.…"   3 hours ago          Exited (0) 2 hours ago                                                      nervous_mirzakhani
+06f493bef887   61395b4c586d    "/docker-entrypoint.…"   3 hours ago          Exited (0) 3 hours ago                                                      interesting_chebyshev
+root@cloudopsAWSbuild:/home/dgxadmin# docker exec -it 5c672620c33c sh
+/ # ll
+sh: ll: not found
+/ # ls
+bin    dev    etc    home   lib    media  mnt    opt    proc   root   run    sbin   srv    sys    tmp    usr    var
+/ # 
+
+
+docker run -
