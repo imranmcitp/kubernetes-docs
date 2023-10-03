@@ -1,0 +1,90 @@
+Backing up etcd
+
+You can backup etcd data using the etcd commandline tool, <etcdctl>.
+
+Use the <etcdctl> snapshot save the command to backup the data
+
+$ETCDCTL_API=3 etcdctl --endpoints $ENDPOINT snapshot save <file name>
+
+Restoring etdd Data
+
+You can restore etcd data from a backup using the etcdctl snapshot restore command.
+
+You will need to supply some additional parameters, as the restore operation creates a new logical cluster.
+
+$ETCDCTL_API=3 etcdctl snapshot restore <file name>
+
+Get Cluster detial beebox
+
+cloud_user@etcd-1:~$ ETCDCTL_API=3 etcdctl get cluster.name \
+> --endpoints=https://10.0.1.101:2379 \
+> --cacert=/home/cloud_user/etcd-certs/etcd-ca.pem \
+> --cert=/home/cloud_user/etcd-certs/etcd-server.crt \
+> --key=/home/cloud_user/etcd-certs/etcd-server.key
+cluster.name
+beebox
+cloud_user@etcd-1:~$
+
+Backingup etcd beebox cluster
+
+loud_user@etcd-1:~$ ETCDCTL_API=3 etcdctl snapshot save /home/cloud_user/etcd_backup.db \
+> --endpoints=https://10.0.1.101:2379 \
+> --cacert=/home/cloud_user/etcd-certs/etcd-ca.pem \
+> --cert=/home/cloud_user/etcd-certs/etcd-server.crt \
+> --key=/home/cloud_user/etcd-certs/etcd-server.key
+{"level":"info","ts":1696326236.011565,"caller":"snapshot/v3_snapshot.go:119","msg":"created temporary db file","path":"/home/cloud_user/etcd_backup.db.part"}
+{"level":"info","ts":"2023-10-03T09:43:56.034Z","caller":"clientv3/maintenance.go:200","msg":"opened snapshot stream; downloading"}
+{"level":"info","ts":1696326236.0347028,"caller":"snapshot/v3_snapshot.go:127","msg":"fetching snapshot","endpoint":"https://10.0.1.101:2379"}
+{"level":"info","ts":"2023-10-03T09:43:56.048Z","caller":"clientv3/maintenance.go:208","msg":"completed snapshot read; closing"}
+{"level":"info","ts":1696326236.0539436,"caller":"snapshot/v3_snapshot.go:142","msg":"fetched snapshot","endpoint":"https://10.0.1.101:2379","size":"20 kB","took":0.040341768}
+{"level":"info","ts":1696326236.0540457,"caller":"snapshot/v3_snapshot.go:152","msg":"saved","path":"/home/cloud_user/etcd_backup.db"}
+Snapshot saved at /home/cloud_user/etcd_backup.db
+cloud_user@etcd-1:~$
+cloud_user@etcd-1:~$ ls
+etcd-certs  etcd_backup.db
+cloud_user@etcd-1:~$
+
+stopping etcd service
+
+cloud_user@etcd-1:~$ sudo systemctl stop etcd
+[sudo] password for cloud_user:
+cloud_user@etcd-1:~$ sudo systemctl status etcd
+● etcd.service - etcd key-value store
+   Loaded: loaded (/etc/systemd/system/etcd.service; enabled; vendor preset: enabled)
+   Active: inactive (dead) since Tue 2023-10-03 09:46:09 UTC; 8s ago
+     Docs: https://github.com/etcd-io/etcd
+  Process: 1377 ExecStart=/usr/local/bin/etcd (code=killed, signal=TERM)
+ Main PID: 1377 (code=killed, signal=TERM)
+
+Oct 03 08:28:26 etcd-1 etcd[1377]: set the initial cluster version to 3.4
+Oct 03 08:28:26 etcd-1 etcd[1377]: enabled capabilities for version 3.4
+Oct 03 08:28:26 etcd-1 etcd[1377]: serving client requests on 10.0.1.101:2379
+Oct 03 09:43:56 etcd-1 etcd[1377]: sending database snapshot to client 20 kB [20480 bytes]
+Oct 03 09:43:56 etcd-1 etcd[1377]: sending database sha256 checksum to client [32 bytes]
+Oct 03 09:43:56 etcd-1 etcd[1377]: successfully sent database snapshot to client 20 kB [20480 byte
+Oct 03 09:46:09 etcd-1 etcd[1377]: received terminated signal, shutting down...
+Oct 03 09:46:09 etcd-1 systemd[1]: Stopping etcd key-value store...
+Oct 03 09:46:09 etcd-1 etcd[1377]: skipped leadership transfer for single voting member cluster
+Oct 03 09:46:09 etcd-1 systemd[1]: Stopped etcd key-value store.
+lines 1-17/17 (END)
+
+
+removeing etcd directory from /var/lib/etcd #to test restore process
+
+
+
+cloud_user@etcd-1:~$ sudo rm -rf /var/lib/etcd/
+cloud_user@etcd-1:~$ sudo systemctl stop etcd
+cloud_user@etcd-1:~$ sudo chown -R etcd:etcd /var/lib/etcd/
+cloud_user@etcd-1:~$ sudo ETCDCTL_API=3 etcdctl snapshot restore /home/cloud_user/etcd_backup.db
+\
+cloud_user@etcd-1:~$ ETCDCTL_API=3 etcdctl get cluster.name \
+> --endpoints=https://10.0.1.101:2379 \
+> --cacert=/home/cloud_user/etcd-certs/etcd-ca.pem \
+> --cert=/home/cloud_user/etcd-certs/etcd-server.crt \
+> --key=/home/cloud_user/etcd-certs/etcd-server.key
+cluster.name
+beebox
+cloud_user@etcd-1:~$
+
+
