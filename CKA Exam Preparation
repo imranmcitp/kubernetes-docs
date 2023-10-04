@@ -1,0 +1,279 @@
+CKA Exam Preparation
+
+Question 1 - Create a new pod called web-pod with image busybox Allow the pod to be able to set system_time​. The container should sleep for 3200 seconds​
+
+kubectl run web-pod --image=busybox --command sleep 3200 --dry-run=client -o yaml > busybox.yml
+
+controlplane $ cat busybox.yml 
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: web-pod
+  name: web-pod
+spec:
+  containers:
+  - command:
+    - sleep
+    - "3200"
+    image: busybox
+    name: web-pod
+    securityContext:
+      capabilities:
+        add: ["SYS_TIME"]
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+controlplane $ 
+
+
+Question 2 - Create a new deployment called myproject, with image nginx:1.16 and ​1 replica. Next upgrade the deployment to version 1.17 using rolling​ update​. Make sure that the version upgrade is recorded in the resource annotation.​
+
+controlplane $ kubectl create deployment myproject --image=nginx:1.16
+deployment.apps/myproject created
+controlplane $ kubectl get pods
+NAME                         READY   STATUS              RESTARTS   AGE
+myproject-7b584cf9d4-sxr2b   0/1     ContainerCreating   0          7s
+web-pod                      1/1     Running             0          4m25s
+controlplane $ 
+
+controlplane $ kubectl set image deployment/myproject nginx=nginx:1.17 --record
+Flag --record has been deprecated, --record will be removed in the future
+deployment.apps/myproject image updated
+
+controlplane $ kubectl describe pod myproject 
+Name:             myproject-698d9d9d49-ggb2s
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             node01/172.30.2.2
+Start Time:       Fri, 22 Sep 2023 11:36:25 +0000
+Labels:           app=myproject
+                  pod-template-hash=698d9d9d49
+Annotations:      cni.projectcalico.org/containerID: d17f70750cd47c8bb0301e00453be509f01ef3c648e8b228e661c2fea0f05b13
+                  cni.projectcalico.org/podIP: 192.168.1.5/32
+                  cni.projectcalico.org/podIPs: 192.168.1.5/32
+Status:           Running
+IP:               192.168.1.5
+IPs:
+  IP:           192.168.1.5
+Controlled By:  ReplicaSet/myproject-698d9d9d49
+Containers:
+  nginx:
+    Container ID:   containerd://afbed7e4301a17eb6bc5c00e15ebb585ed839ece941142f609dbbe05d3855671
+    Image:          nginx:1.17
+    Image ID:       docker.io/library/nginx@sha256:6fff55753e3b34e36e24e37039ee9eae1fe38a6420d8ae16ef37c92d1eb26699
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Fri, 22 Sep 2023 11:36:31 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-lks89 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-lks89:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  46s   default-scheduler  Successfully assigned default/myproject-698d9d9d49-ggb2s to node01
+  Normal  Pulling    46s   kubelet            Pulling image "nginx:1.17"
+  Normal  Pulled     41s   kubelet            Successfully pulled image "nginx:1.17" in 4.996549459s (4.996553777s including waiting)
+  Normal  Created    41s   kubelet            Created container nginx
+  Normal  Started    41s   kubelet            Started container nginx
+
+controlplane $ 
+controlplane $ 
+
+kubectl create deployment sample --image=nginx:latest --replicas=2 --dry-run=client -o yaml >> sample.yaml
+
+controlplane $ kubectl create deployment sample --image=nginx:latest --replicas=2 --dry-run=client -o yaml >> sample.yaml
+controlplane $ ls
+busybox.yml  filesystem  sample.yaml
+controlplane $ cat sample.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: sample
+  name: sample
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sample
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: sample
+    spec:
+      containers:
+      - image: nginx:latest
+        name: nginx
+        resources: {}
+status: {}
+controlplane $ kubectl apply -f sample.yaml 
+deployment.apps/sample created
+controlplane $ kubectl get pods
+NAME                         READY   STATUS    RESTARTS   AGE
+myproject-698d9d9d49-ggb2s   1/1     Running   0          14m
+sample-b4b587754-b8j6p       1/1     Running   0          10s
+sample-b4b587754-fbdz6       1/1     Running   0          10s
+web-pod                      1/1     Running   0          22m
+controlplane $ kubectl describe pods sample
+Name:             sample-b4b587754-b8j6p
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             node01/172.30.2.2
+Start Time:       Fri, 22 Sep 2023 11:50:20 +0000
+Labels:           app=sample
+                  pod-template-hash=b4b587754
+Annotations:      cni.projectcalico.org/containerID: 25ecb2fde3c65c0cfa97046bc18a6d54057cea6a2f9af2a565fdd4bea40a4f28
+                  cni.projectcalico.org/podIP: 192.168.1.6/32
+                  cni.projectcalico.org/podIPs: 192.168.1.6/32
+Status:           Running
+IP:               192.168.1.6
+IPs:
+  IP:           192.168.1.6
+Controlled By:  ReplicaSet/sample-b4b587754
+Containers:
+  nginx:
+    Container ID:   containerd://4fb6ddb9ddd515940e86fb0f03e0e09507b5acae861697d13638c4481f093241
+    Image:          nginx:latest
+    Image ID:       docker.io/library/nginx@sha256:32da30332506740a2f7c34d5dc70467b7f14ec67d912703568daff790ab3f755
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Fri, 22 Sep 2023 11:50:27 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-22cht (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-22cht:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  28s   default-scheduler  Successfully assigned default/sample-b4b587754-b8j6p to node01
+  Normal  Pulling    28s   kubelet            Pulling image "nginx:latest"
+  Normal  Pulled     22s   kubelet            Successfully pulled image "nginx:latest" in 6.05451143s (6.054576885s including waiting)
+  Normal  Created    21s   kubelet            Created container nginx
+  Normal  Started    21s   kubelet            Started container nginx
+
+Name:             sample-b4b587754-fbdz6
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             node01/172.30.2.2
+Start Time:       Fri, 22 Sep 2023 11:50:20 +0000
+Labels:           app=sample
+                  pod-template-hash=b4b587754
+Annotations:      cni.projectcalico.org/containerID: 77264e4424464a184480318e85deb1bb3529b28125dbf342db4accdf62086a60
+                  cni.projectcalico.org/podIP: 192.168.1.7/32
+                  cni.projectcalico.org/podIPs: 192.168.1.7/32
+Status:           Running
+IP:               192.168.1.7
+IPs:
+  IP:           192.168.1.7
+Controlled By:  ReplicaSet/sample-b4b587754
+Containers:
+  nginx:
+    Container ID:   containerd://519ceec4b453d76840a7704648ba25654a6aeab15f2726dc9b0cfdfcbc962fea
+    Image:          nginx:latest
+    Image ID:       docker.io/library/nginx@sha256:32da30332506740a2f7c34d5dc70467b7f14ec67d912703568daff790ab3f755
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Fri, 22 Sep 2023 11:50:27 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-5ts5p (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-5ts5p:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  28s   default-scheduler  Successfully assigned default/sample-b4b587754-fbdz6 to node01
+  Normal  Pulling    28s   kubelet            Pulling image "nginx:latest"
+  Normal  Pulled     21s   kubelet            Successfully pulled image "nginx:latest" in 661.918717ms (6.655096859s including waiting)
+  Normal  Created    21s   kubelet            Created container nginx
+  Normal  Started    21s   kubelet            Started container nginx
+
+controlplane $ kubectl get sercices
+error: the server doesn't have a resource type "sercices"
+controlplane $ kubectl get sercice 
+error: the server doesn't have a resource type "sercice"
+controlplane $ kubectl get service
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   18d
+controlplane $ 
+controlplane $ 
+controlplane $ 
+
+
+
+
+
+
+
+
+
+
+
+
+
