@@ -1,0 +1,19 @@
+# Get current privileges
+kubectl auth can-i --list
+# use `--as=system:serviceaccount:<namespace>:<sa_name>` to impersonate a service account
+
+# List Cluster Roles
+kubectl get clusterroles
+kubectl describe clusterroles
+
+# List Cluster Roles Bindings
+kubectl get clusterrolebindings
+kubectl describe clusterrolebindings
+
+# List Roles
+kubectl get roles
+kubectl describe roles
+
+# List Roles Bindings
+kubectl get rolebindings
+kubectl describe rolebindings
